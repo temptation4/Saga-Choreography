@@ -102,16 +102,6 @@ It simulates an **Order workflow** across multiple microservices with event-driv
 3. Place an order via **Order Service API**.
 4. Observe the **choreographed events** in Kafka topics.
 
----
-
-## 🖼 Architecture
-
-Client → Order Service → [OrderCreatedEvent] → Inventory Service
-↑ ↓
-└────── [OrderShippedEvent] ← Shipping Service ← [PaymentCompletedEvent] ← Payment Service ← [InventoryReservedEvent]
-│
-└────── Cancel (InventoryFailedEvent / PaymentFailedEvent)
-
 
 ---
 
