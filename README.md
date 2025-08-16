@@ -37,6 +37,7 @@ If any service fails, they publish a failure event → other services compensate
                               │ PaymentFailedEvent│                           │
                               └──────────────────►│                           │
 
+
 ## Quick Start
 
 ### 1) Start Kafka (Docker)
