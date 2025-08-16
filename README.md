@@ -2,11 +2,40 @@
 
 This is a minimal end-to-end example of a **Choreography-based Saga** for an e-commerce order flow:
 
-1. **Order Service** → publishes `OrderCreatedEvent`
-2. **Payment Service** → on `OrderCreatedEvent` → approves/declines → `PaymentCompletedEvent` or `PaymentFailedEvent`
-3. **Inventory Service** → on `PaymentCompletedEvent` → reserves stock → `StockReservedEvent` or `StockReservationFailedEvent`
-4. **Shipping Service** → on `StockReservedEvent` → ships → `OrderShippedEvent`
-5. **Compensation** → on `StockReservationFailedEvent` → Payment refunds → `PaymentRefundedEvent` → Order cancels
+🔹 Example: E-commerce Order Placement
+
+Flow when a user places an order:
+
+Order Service → creates order with status PENDING and publishes OrderCreatedEvent.
+
+Payment Service → listens for OrderCreatedEvent.
+
+If payment succeeds → publishes PaymentSuccessEvent.
+
+If payment fails → publishes PaymentFailedEvent.
+
+Inventory Service → listens for PaymentSuccessEvent.
+
+Reserves product stock.
+
+If success → publishes InventoryReservedEvent.
+
+If failure → publishes InventoryFailedEvent.
+
+Shipping Service → listens for InventoryReservedEvent and arranges shipment.
+
+If any service fails, they publish a failure event → other services compensate (e.g., Payment refund, release stock, cancel order).
+
+🔹 Architecture Diagram
+ ┌────────────┐        ┌─────────────┐        ┌───────────────┐        ┌──────────────┐
+ │  Order     │        │  Payment    │        │   Inventory   │        │   Shipping   │
+ │  Service   │        │  Service    │        │   Service     │        │   Service    │
+ └─────┬──────┘        └─────┬───────┘        └──────┬────────┘        └──────┬──────┘
+       │ OrderCreatedEvent    │                   │ PaymentSuccessEvent        │
+       └─────────────────────►│                   │                           │
+                              │                   └──────────────────────────► │
+                              │ PaymentFailedEvent│                           │
+                              └──────────────────►│                           │
 
 ## Quick Start
 
