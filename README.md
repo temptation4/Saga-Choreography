@@ -1,144 +1,119 @@
-# 🌀 Saga Design Pattern (Choreography) – Microservices Example
+# Saga Design Pattern - Choreography
 
-This project demonstrates the **Saga Choreography Pattern** using **Spring Boot, Kafka, and MySQL** across multiple microservices.  
-The goal is to manage **distributed transactions** in an e-commerce order workflow (Order → Payment → Inventory → Shipping).
+This project demonstrates the **Saga Choreography pattern** using Spring Boot and Kafka.  
+It simulates an **Order workflow** across multiple microservices with event-driven communication.
 
 ---
 
-## 📌 Services in the Project
+## 🚀 Microservices in the Project
 
 1. **Order Service**
-   - Receives order requests.
-   - Publishes `OrderCreatedEvent` to Kafka.
-   - Updates order status based on events from other services.
+   - Accepts order requests from clients.
+   - Creates orders in `PENDING` state.
+   - Publishes **`OrderCreatedEvent`**.
 
-2. **Payment Service**
-   - Listens for `OrderCreatedEvent`.
-   - Tries to process the payment.
-   - Publishes either `PaymentSuccessEvent` or `PaymentFailedEvent`.
+2. **Inventory Service**
+   - Consumes **`OrderCreatedEvent`**.
+   - Reserves product stock if available.
+   - Publishes:
+     - **`InventoryReservedEvent`** (success)  
+     - **`InventoryFailedEvent`** (failure)
 
-3. **Inventory Service**
-   - Listens for `PaymentSuccessEvent`.
-   - Validates product availability.
-   - Publishes either `InventoryReservedEvent` or `InventoryFailedEvent`.
+3. **Payment Service**
+   - Consumes **`InventoryReservedEvent`**.
+   - Processes payment.
+   - Publishes:
+     - **`PaymentCompletedEvent`** (success)  
+     - **`PaymentFailedEvent`** (failure → triggers inventory release)
 
 4. **Shipping Service**
-   - Listens for `InventoryReservedEvent`.
-   - Schedules shipment for successful orders.
-   - Publishes `OrderShippedEvent`.
+   - Consumes **`PaymentCompletedEvent`**.
+   - Prepares shipping.
+   - Publishes **`OrderShippedEvent`**.
+
+5. **Order Service Compensation**
+   - Consumes:
+     - **`InventoryFailedEvent`** → updates order as `CANCELLED`
+     - **`PaymentFailedEvent`** → updates order as `CANCELLED`
+     - **`OrderShippedEvent`** → updates order as `COMPLETED`
 
 ---
 
-## 🔄 Complete Flow of the Saga (Choreography)
+## 🛠 Event Flow
 
-### ✅ Success Flow
-Customer -> Order Service -> Kafka -> Payment Service -> Inventory Service -> Shipping Service
+1. **Client → Order Service**
+   - API call: `POST /orders`
+   - Order status = `PENDING`
+   - Publishes **OrderCreatedEvent**
 
-markdown
-Copy
-Edit
+2. **OrderCreatedEvent → Inventory Service**
+   - If stock available → Publishes **InventoryReservedEvent**  
+   - If stock not available → Publishes **InventoryFailedEvent**
 
-1. **Customer places an order** (Order Service creates record → status = `PENDING`).  
-2. `OrderCreatedEvent` is published.  
-3. **Payment Service** processes payment → publishes `PaymentSuccessEvent`.  
-4. **Inventory Service** reserves items → publishes `InventoryReservedEvent`.  
-5. **Shipping Service** ships order → publishes `OrderShippedEvent`.  
-6. **Order Service** updates order status to **COMPLETED**.  
+3. **InventoryReservedEvent → Payment Service**
+   - If payment successful → Publishes **PaymentCompletedEvent**  
+   - If payment failed → Publishes **PaymentFailedEvent**
 
----
+4. **PaymentCompletedEvent → Shipping Service**
+   - Shipping prepared → Publishes **OrderShippedEvent**
 
-### ❌ Failure Flows
+5. **Failure Handling**
+   - `InventoryFailedEvent` → Order Service updates status to `CANCELLED`
+   - `PaymentFailedEvent` → Order Service updates status to `CANCELLED` and Inventory Service releases stock
 
-#### Case 1: Payment Failure
-1. Payment Service fails → publishes `PaymentFailedEvent`.  
-2. Order Service updates order → status = **CANCELLED**.  
-
-#### Case 2: Inventory Failure
-1. Inventory Service fails → publishes `InventoryFailedEvent`.  
-2. Order Service updates order → status = **CANCELLED**.  
-3. Payment Service may trigger **compensation** (refund).  
-
-#### Case 3: Shipping Failure
-1. Shipping fails → publishes `ShippingFailedEvent`.  
-2. Order Service updates order → status = **FAILED**.  
-3. Compensation may trigger (release inventory, refund payment).  
+6. **Success Handling**
+   - `OrderShippedEvent` → Order Service updates status to `COMPLETED`
 
 ---
 
-## 🗂️ Project Structure
+## 📌 Topics Used in Kafka
 
-Saga-Choreography/
-│── order-service/
-│── payment-service/
-│── inventory-service/
-│── shipping-service/
-│── common/ # Shared event classes and DTOs
-│── docker-compose.yml
-│── README.md
-
-yaml
-Copy
-Edit
+- `order-created`
+- `inventory-reserved`
+- `inventory-failed`
+- `payment-completed`
+- `payment-failed`
+- `order-shipped`
 
 ---
 
-## ⚙️ Tech Stack
+## ✅ Final Outcome
 
-- **Spring Boot 3**
-- **Kafka** (event streaming)
-- **MySQL** (persistent storage)
-- **JPA / Hibernate**
-- **Docker & Docker Compose** (for containerized deployment)
+- **Happy Path** → Order moves through all services → status becomes **`COMPLETED`**.  
+- **Failure Path** → Any failure (Inventory or Payment) → order becomes **`CANCELLED`**.
 
 ---
 
-## ▶️ How to Run
+## ⚡ Tech Stack
 
-### 1. Start Kafka & Zookeeper
-```bash
-docker-compose up -d
-2. Run Each Service
-Inside each service folder:
+- Java 19
+- Spring Boot 3
+- Spring Kafka
+- MySQL (Order DB)
+- Docker / Docker Compose
+- Apache Kafka & Zookeeper
 
-bash
-Copy
-Edit
-mvn spring-boot:run
-3. Place an Order
-http
-Copy
-Edit
-POST http://localhost:8088/orders
-Content-Type: application/json
+---
 
-{
-  "customerId": 1,
-  "productId": 101,
-  "amount": 500
-}
-4. Monitor Flow
-Kafka Topics: order-created, payment-success, payment-failed, inventory-reserved, inventory-failed, order-shipped
+## 🔑 Running the Project
 
-Check orderdb table to verify order status.
+1. Start Kafka & Zookeeper using Docker.
+2. Run all microservices (`Order`, `Inventory`, `Payment`, `Shipping`).
+3. Place an order via **Order Service API**.
+4. Observe the **choreographed events** in Kafka topics.
 
-📊 Order Status Lifecycle
-Event	Order Status
-Order Created	PENDING
-Payment Success	PAYMENT_DONE
-Inventory Reserved	INVENTORY_OK
-Shipping Success	COMPLETED
-Payment/Inventory Fail	CANCELLED
-Shipping Fail	FAILED
+---
 
-🚀 Future Improvements
-Add Dead Letter Queues (DLQ) for failed events.
+## 🖼 Architecture
 
-Implement Resilience4j for retries and circuit breakers.
+Client → Order Service → [OrderCreatedEvent] → Inventory Service
+↑ ↓
+└────── [OrderShippedEvent] ← Shipping Service ← [PaymentCompletedEvent] ← Payment Service ← [InventoryReservedEvent]
+│
+└────── Cancel (InventoryFailedEvent / PaymentFailedEvent)
 
-Add Monitoring (Prometheus + Grafana).
 
-👨‍💻 Author
-Neelu Sahai – Senior Java Developer (11 years experience)
-📧 Email: neelhuma@gmail.com
-🔗 GitHub: temptation4
+---
 
+## 👨‍💻 Author
+Neelu Sahai  
