@@ -1,175 +1,144 @@
-# Saga Choreography (Spring Boot + Kafka) — Multi-Module
+# 🌀 Saga Design Pattern (Choreography) – Microservices Example
 
-🌀 Saga Choreography Flow – E-Commerce Example
-1. Order Service
+This project demonstrates the **Saga Choreography Pattern** using **Spring Boot, Kafka, and MySQL** across multiple microservices.  
+The goal is to manage **distributed transactions** in an e-commerce order workflow (Order → Payment → Inventory → Shipping).
 
-User places order → REST API /orders
+---
 
-Order Service saves order with status = PENDING
+## 📌 Services in the Project
 
-Publishes event OrderCreatedEvent → Kafka topic order-events
-
-2. Inventory Service
-
-Listens to order-events
-
-On OrderCreatedEvent:
-
-Check if stock is available
-
-If ✅ → reserve stock → publish InventoryReservedEvent
-
-If ❌ → publish InventoryFailedEvent
-
-3. Payment Service
-
-Listens to inventory-events
-
-On InventoryReservedEvent:
-
-Try charging payment
-
-If ✅ → publish PaymentCompletedEvent
-
-If ❌ → publish PaymentFailedEvent
-
-4. Shipping Service
-
-Listens to payment-events
-
-On PaymentCompletedEvent:
-
-Arrange shipment
-
-Publish OrderShippedEvent
-
-5. Order Service (again)
-
-Listens to multiple events:
-
-On InventoryFailedEvent → update order → CANCELLED
-
-On PaymentFailedEvent → update order → CANCELLED, publish InventoryRollbackEvent
-
-On OrderShippedEvent → update order → COMPLETED
-
-🔄 Compensation (Rollback Flow)
-
-Since Saga Choreography must handle failures:
-
-Inventory fails → Order Service marks order as CANCELLED.
-
-Payment fails →
-
-Order Service cancels order.
-
-Publishes InventoryRollbackEvent → Inventory Service restores stock.
-
-Shipping fails (optional) → Order Service may refund payment + rollback inventory (advanced scenario).
-
-📊 Event Flow Diagram (textual)
-User → OrderService → [**OrderCreatedEvent**] → **InventoryService**
-        ↑                                          ↓
-        └── [**OrderCancelledEvent**] ← [**InventoryFailedEvent**]
-
-**InventoryService** → [**InventoryReservedEvent**] → **PaymentService**
-        ↑                                          ↓
-        └── [**InventoryRollbackEvent**] ← [**PaymentFailedEvent**]
-
-**PaymentService** → [**PaymentCompletedEvent**] → **ShippingService**
-        ↑                                          ↓
-        └── [🌀 Saga Choreography Flow – E-Commerce Example
 1. **Order Service**
+   - Receives order requests.
+   - Publishes `OrderCreatedEvent` to Kafka.
+   - Updates order status based on events from other services.
 
-User places order → REST API /orders
+2. **Payment Service**
+   - Listens for `OrderCreatedEvent`.
+   - Tries to process the payment.
+   - Publishes either `PaymentSuccessEvent` or `PaymentFailedEvent`.
 
-Order Service saves order with status = PENDING
-
-Publishes event OrderCreatedEvent → Kafka topic order-events
-
-2. **Inventory Service**
-
-Listens to order-events
-
-On OrderCreatedEvent:
-
-Check if stock is available
-
-If ✅ → reserve stock → publish InventoryReservedEvent
-
-If ❌ → publish InventoryFailedEvent
-
-3. **Payment Service**
-
-Listens to inventory-events
-
-On InventoryReservedEvent:
-
-Try charging payment
-
-If ✅ → publish PaymentCompletedEvent
-
-If ❌ → publish PaymentFailedEvent
+3. **Inventory Service**
+   - Listens for `PaymentSuccessEvent`.
+   - Validates product availability.
+   - Publishes either `InventoryReservedEvent` or `InventoryFailedEvent`.
 
 4. **Shipping Service**
+   - Listens for `InventoryReservedEvent`.
+   - Schedules shipment for successful orders.
+   - Publishes `OrderShippedEvent`.
 
-Listens to payment-events
+---
 
-On PaymentCompletedEvent:
+## 🔄 Complete Flow of the Saga (Choreography)
 
-Arrange shipment
+### ✅ Success Flow
+Customer -> Order Service -> Kafka -> Payment Service -> Inventory Service -> Shipping Service
 
-Publish OrderShippedEvent
+markdown
+Copy
+Edit
 
-5. Order Service (again)
+1. **Customer places an order** (Order Service creates record → status = `PENDING`).  
+2. `OrderCreatedEvent` is published.  
+3. **Payment Service** processes payment → publishes `PaymentSuccessEvent`.  
+4. **Inventory Service** reserves items → publishes `InventoryReservedEvent`.  
+5. **Shipping Service** ships order → publishes `OrderShippedEvent`.  
+6. **Order Service** updates order status to **COMPLETED**.  
 
-Listens to multiple events:
+---
 
-On InventoryFailedEvent → update order → CANCELLED
+### ❌ Failure Flows
 
-On PaymentFailedEvent → update order → CANCELLED, publish InventoryRollbackEvent
+#### Case 1: Payment Failure
+1. Payment Service fails → publishes `PaymentFailedEvent`.  
+2. Order Service updates order → status = **CANCELLED**.  
 
-On OrderShippedEvent → update order → COMPLETED
+#### Case 2: Inventory Failure
+1. Inventory Service fails → publishes `InventoryFailedEvent`.  
+2. Order Service updates order → status = **CANCELLED**.  
+3. Payment Service may trigger **compensation** (refund).  
 
-🔄 Compensation (Rollback Flow)
+#### Case 3: Shipping Failure
+1. Shipping fails → publishes `ShippingFailedEvent`.  
+2. Order Service updates order → status = **FAILED**.  
+3. Compensation may trigger (release inventory, refund payment).  
 
-Since Saga Choreography must handle failures:
+---
 
-Inventory fails → Order Service marks order as CANCELLED.
+## 🗂️ Project Structure
 
-Payment fails →
+Saga-Choreography/
+│── order-service/
+│── payment-service/
+│── inventory-service/
+│── shipping-service/
+│── common/ # Shared event classes and DTOs
+│── docker-compose.yml
+│── README.md
 
-Order Service cancels order.
+yaml
+Copy
+Edit
 
-Publishes InventoryRollbackEvent → Inventory Service restores stock.
+---
 
-Shipping fails (optional) → Order Service may refund payment + rollback inventory (advanced scenario).
+## ⚙️ Tech Stack
 
-📊 Event Flow Diagram (textual)
-User → OrderService → [OrderCreatedEvent] → InventoryService
-        ↑                                          ↓
-        └── [OrderCancelledEvent] ← [InventoryFailedEvent]
+- **Spring Boot 3**
+- **Kafka** (event streaming)
+- **MySQL** (persistent storage)
+- **JPA / Hibernate**
+- **Docker & Docker Compose** (for containerized deployment)
 
-InventoryService → [InventoryReservedEvent] → PaymentService
-        ↑                                          ↓
-        └── [InventoryRollbackEvent] ← [PaymentFailedEvent]
+---
 
-PaymentService → [PaymentCompletedEvent] → ShippingService
-        ↑                                          ↓
-        └── [PaymentFailedEvent] → OrderService (cancel)
+## ▶️ How to Run
 
-ShippingService → [OrderShippedEvent] → OrderService (complete)
+### 1. Start Kafka & Zookeeper
+```bash
+docker-compose up -d
+2. Run Each Service
+Inside each service folder:
 
-✅ Final States of Order
+bash
+Copy
+Edit
+mvn spring-boot:run
+3. Place an Order
+http
+Copy
+Edit
+POST http://localhost:8088/orders
+Content-Type: application/json
 
-COMPLETED → Order placed, inventory reserved, payment done, shipment arranged.
+{
+  "customerId": 1,
+  "productId": 101,
+  "amount": 500
+}
+4. Monitor Flow
+Kafka Topics: order-created, payment-success, payment-failed, inventory-reserved, inventory-failed, order-shipped
 
-CANCELLED → Any failure in Inventory / Payment / Shipping triggers rollback.] → OrderService (cancel)
+Check orderdb table to verify order status.
 
-ShippingService → [OrderShippedEvent] → OrderService (complete)
+📊 Order Status Lifecycle
+Event	Order Status
+Order Created	PENDING
+Payment Success	PAYMENT_DONE
+Inventory Reserved	INVENTORY_OK
+Shipping Success	COMPLETED
+Payment/Inventory Fail	CANCELLED
+Shipping Fail	FAILED
 
-✅ Final States of Order
+🚀 Future Improvements
+Add Dead Letter Queues (DLQ) for failed events.
 
-COMPLETED → Order placed, inventory reserved, payment done, shipment arranged.
+Implement Resilience4j for retries and circuit breakers.
 
-CANCELLED → Any failure in Inventory / Payment / Shipping triggers rollback.
+Add Monitoring (Prometheus + Grafana).
+
+👨‍💻 Author
+Neelu Sahai – Senior Java Developer (11 years experience)
+📧 Email: neelhuma@gmail.com
+🔗 GitHub: temptation4
+
