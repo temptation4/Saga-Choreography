@@ -1,0 +1,6 @@
+com/example/saga/inventoryservice/controller/InventoryController.class
+com/example/saga/inventoryservice/InventoryServiceApplication.class
+com/example/saga/inventoryservice/repository/InventoryRepository.class
+com/example/saga/inventoryservice/service/InventoryService.class
+com/example/saga/inventoryservice/listener/InventoryListener.class
+com/example/saga/inventoryservice/entity/Inventory.class

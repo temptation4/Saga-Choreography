@@ -1,0 +1,12 @@
+com/example/saga/common/events/OrderShippedEvent.class
+com/example/saga/common/events/PaymentRefundedEvent.class
+com/example/saga/common/events/InventoryFailedEvent.class
+com/example/saga/common/config/KafkaCommonConfig.class
+com/example/saga/common/events/ShippingCompletedEvent.class
+com/example/saga/common/events/PaymentFailedEvent.class
+com/example/saga/common/events/StockReservationFailedEvent.class
+com/example/saga/common/events/OrderFailedEvent.class
+com/example/saga/common/events/StockReservedEvent.class
+com/example/saga/common/events/OrderCreatedEvent.class
+com/example/saga/common/events/PaymentCompletedEvent.class
+com/example/saga/common/events/InventoryCompletedEvent.class

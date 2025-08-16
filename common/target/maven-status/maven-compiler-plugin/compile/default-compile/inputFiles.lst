@@ -1,0 +1,12 @@
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/StockReservedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/StockReservationFailedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/ShippingCompletedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/PaymentRefundedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/PaymentCompletedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/OrderFailedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/InventoryCompletedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/OrderCreatedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/OrderShippedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/InventoryFailedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/events/PaymentFailedEvent.java
+/Users/neelu/Downloads/saga-choreography-multi-module/common/src/main/java/com/example/saga/common/config/KafkaCommonConfig.java

@@ -1,0 +1,6 @@
+/Users/neelu/Downloads/saga-choreography-multi-module/inventory-service/src/main/java/com/example/saga/inventoryservice/repository/InventoryRepository.java
+/Users/neelu/Downloads/saga-choreography-multi-module/inventory-service/src/main/java/com/example/saga/inventoryservice/service/InventoryService.java
+/Users/neelu/Downloads/saga-choreography-multi-module/inventory-service/src/main/java/com/example/saga/inventoryservice/listener/InventoryListener.java
+/Users/neelu/Downloads/saga-choreography-multi-module/inventory-service/src/main/java/com/example/saga/inventoryservice/controller/InventoryController.java
+/Users/neelu/Downloads/saga-choreography-multi-module/inventory-service/src/main/java/com/example/saga/inventoryservice/InventoryServiceApplication.java
+/Users/neelu/Downloads/saga-choreography-multi-module/inventory-service/src/main/java/com/example/saga/inventoryservice/entity/Inventory.java

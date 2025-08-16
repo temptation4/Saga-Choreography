@@ -1,0 +1,5 @@
+com/example/saga/shippingservice/entity/Shipment.class
+com/example/saga/shippingservice/controller/ShippingController.class
+com/example/saga/shippingservice/repository/ShipmentRepository.class
+com/example/saga/shippingservice/listener/ShippingListener.class
+com/example/saga/shippingservice/ShippingServiceApplication.class
