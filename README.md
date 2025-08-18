@@ -65,7 +65,8 @@ It simulates an **Order workflow** across multiple microservices with event-driv
    - `OrderShippedEvent` → Order Service updates status to `COMPLETED`
 
 ---
-<img width="1398" height="462" alt="image" src="https://github.com/user-attachments/assets/a95172ca-97f6-40af-a965-d7437fb63e1a" />
+<img width="1528" height="116" alt="image" src="https://github.com/user-attachments/assets/9449d6b5-bc14-4215-b0bd-ab2e39557510" />
+
 
 
 ## 📌 Topics Used in Kafka
