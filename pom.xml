@@ -14,6 +14,7 @@
     <module>payment-service</module>
     <module>inventory-service</module>
     <module>shipping-service</module>
+    <module>cart-service</module>
   </modules>
 
   <properties>

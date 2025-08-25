@@ -1,6 +1,5 @@
 package com.example.saga.inventoryservice.controller;
 import com.example.saga.inventoryservice.entity.Inventory;
-import com.example.saga.inventoryservice.repository.InventoryRepository;
 import com.example.saga.inventoryservice.service.InventoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

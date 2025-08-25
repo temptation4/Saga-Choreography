@@ -1,9 +1,13 @@
 package com.example.saga.inventoryservice.service;
 
 import com.example.saga.inventoryservice.entity.Inventory;
+import com.example.saga.inventoryservice.entity.Product;
 import com.example.saga.inventoryservice.repository.InventoryRepository;
+import com.example.saga.inventoryservice.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class InventoryService {
