@@ -3,7 +3,7 @@
 This project demonstrates the **Saga Choreography pattern** using Spring Boot and Kafka.  
 It simulates an **Order workflow** across multiple microservices with event-driven communication.  
 
----
+--- 
 
 ## 🚀 Microservices in the Project 
 
