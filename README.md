@@ -5,7 +5,7 @@ It simulates an **Order workflow** across multiple microservices with event-driv
 
 --- 
 
-## 🚀 Microservices in the Project   
+## 🚀 Microservices in the Project    
 
 1. **Order Service**
    - Accepts order requests from clients.
